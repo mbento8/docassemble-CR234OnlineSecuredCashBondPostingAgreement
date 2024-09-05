@@ -192,14 +192,13 @@ content: |
   % endif
   bail online.
   
-  
-  Their  email address is: ${ users[0].email}
+  ${ users[0].name.full(middle="full") }'s email address is: ${ users[0].email}
 ---
 code: |
   # recipient = get_config('cook after hours email')
   user = users[0].email
   recipient = 'mbento@akcourts.us'
-  clerk_email_sent_ok = al_court_bundle.send_email(to=recipient, reply_to=user, template=clerk_email)
+  clerk_email_sent_ok = al_court_bundle.send_email(to=recipient, reply_to=users[0].email, template=clerk_email)
 ---
 id: email confirmation page
 continue button field: email_sent

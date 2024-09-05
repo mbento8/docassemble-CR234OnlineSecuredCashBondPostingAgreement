@@ -168,6 +168,7 @@ fields:
     required: True
   - Date of Birth: defendants[0].birthdate
     datatype: date
+    max: ${ today() }
     required: True
 ---
 id: read CR-233
