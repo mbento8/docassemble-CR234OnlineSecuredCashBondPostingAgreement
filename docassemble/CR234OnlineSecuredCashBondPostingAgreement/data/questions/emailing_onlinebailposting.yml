@@ -1,0 +1,264 @@
+comment: |
+  https://raw.githubusercontent.com/IllinoisLegalAidOnline/docassemble-EmergencyOrderOfProtectionCookCounty/main/docassemble/EmergencyOrderOfProtectionCookCounty/data/questions/order_of_protection.yml
+---
+# interview order block
+code: |
+  # forms_assembling
+  # snapshot_forms
+  get_docs_screen
+  recaptcha_success # Give it some time to process
+  if confirm_email_send_now:
+    if not recaptcha_success:
+      # TODO: Put a snapshot here to see how many robots get caught
+      # Which doesn't actually reflect how many robots came
+      # since some robots may not be caught. We have yet to see this
+      # catcha a robot
+      robot_end # event
+    # self_preparation  
+    # clerk_email_prep
+    if clerk_email_sent_ok:
+      # snapshot_email
+      email_sent
+    else:
+      email_not_sent
+  ending_screen
+  mailing_steps = True
+# ---
+#  id: forms assembling
+#  continue button field: forms_assembling
+#  question: |
+#   Almost done
+#  subquestion: |
+#   After you click **Next**, it will take a few moments to finish making your form.
+#   
+#   You do not need to refresh your screen.
+#   
+#   &nbsp;
+---
+id: get docs screen
+continue button field: get_docs_screen
+continue button label: ":file-export: Next"
+question: |
+  Almost done
+subquestion: |
+  After you click **Next**, it will take a few moments to finish making your form.
+  
+  ###### You do not need to refresh your screen.
+
+script: |
+  ${ recaptcha_javascript() }
+  
+---
+id: email preview
+continue button field: email_preview
+question: |
+  Email contents
+subquestion: |
+  email subject:
+  Online Secured Cash Bond Posting Agreement - Alaska Court System - ${ users[0].name.full(middle="full") } 
+  
+  [NEWLINE]
+  Mail body: 
+  ${ users[0].name.full(middle="full") } is requesting a link to pay
+  % if person_filing == "obo":
+  ${ defendants[0].name.full(middle="full") }'s 
+  % else:
+  their
+  % endif
+  bail online.
+  
+  % if person_filing == "obo":
+  ${ defendants[0].name.full(middle="full")  }'s friend or family member"s 
+  % else:
+  Their
+  % endif
+  email address is: ${ users[0].email}
+---
+id: ending screen
+event: ending_screen
+question: |
+  View and download your form
+subquestion: |
+  % if clerk_email_sent_ok:
+  **Note:** Your form was already submitted to the clerk.
+  % else:
+  **Note:** Your form was not submitted to the clerk.
+  % endif
+  
+  ${ al_user_bundle.download_list_html() }
+
+  &nbsp;
+
+  ${ al_user_bundle.send_button_html(show_editable_checkbox=False) }
+  
+under: |
+  ###### **Questions?**  
+  ###### If you are wondering about the status of your request to post bail online for an individual, you can send an email inquiry to onlinebailposting@akcourts.gov. Please keep in mind that the court can only reply to the emails during processing hours listed [here](https://courts.alaska.gov/trialcourts/bail.htm). The court replies to all emails as quickly as possible and appreciates your patience.
+  
+buttons:
+  - Exit: exit
+  - Restart: restart
+---
+id: robot end
+event: robot_end
+question: |
+  Sorry, you cannot submit your form.
+subquestion: |
+  You can go back, download the form, and email it to [onlinebailposting@akcourts.gov](mailto:onlinebailposting@akcourts.gov).
+---
+id: are you sure
+question: |
+  Your form is ready to be submitted to the clerk
+subquestion: |
+  When the court gets your form, they will email you. The email includes a link to the webpage where you can pay the bail. 
+  
+  After you pay the full amount of 
+  % if person_filing == "obo":
+  ${ defendants[0].name.first }'s 
+  % else:
+  your
+  % endif
+  bail, the court will update 
+  % if person_filing == "obo":
+  ${ defendants[0].name.first }'s 
+  % else:
+  your
+  % endif
+  case records to reflect that bail has been posted. If 
+  % if person_filing == "obo":
+  ${ defendants[0].name.first } is
+  % else:
+  you are
+  % endif
+   in custody, the court will notify the jail that bail was posted and the jail will begin the process of releasing 
+    % if person_filing == "obo":
+  ${ defendants[0].name.first }.
+  % else:
+  you.
+  % endif 
+  
+  The court only processes requests to post bail online during the following times:
+  
+  
+  **In-custody Defendants**  
+  Monday through Friday: 8am to 4pm  
+  Saturday and Sunday: 10am to 3pm
+  
+  
+  **Out-of-custody Defendants**  
+  Monday through Friday: 8am to 4pm
+
+  **Note:**
+  This may take several hours.
+  
+# fields:
+#   - "Email your form now?": confirm_email_send_now
+#     input type: radio
+#     choices: 
+#       - Yes, I want to email my form to the clerk now.: True
+#       - No, I want to get my form now. I will file it later.: False
+# 
+continue button field: confirm_email_send_now
+continue button label: Submit form to the clerk
+
+
+under: | 
+  Online bail payments can be made with a VISA or MasterCard credit card or debit card. You cannot pay with an American Express or Discover card.
+
+  Each credit card transaction will be assessed a 3% convenience fee. If/when bail is later returned (exonerated) to the payer, the fee will not be returned.
+
+  If bail is more than $97,000, the person posting bail must make more than one payment until the total amount paid equals the total of bail. For example, if bail is $250,000, make three payments: Payment 1 = $95,000 + 3% fee, Payment 2 = $95,000 + 3% fee, and Payment 3= $60,000 + 3% fee. A single payment cannot exceed $99,999 including the 3% convenience fee.
+
+---
+template: al_user_bundle.send_email_template
+subject: |
+  Your court form
+content: |
+  A copy of the form you submitted to the online bail posting clerk is attached. 
+
+  If you have any questions or want to check the status of the bail you posted, send an email inquiry to [onlinebailposting@akcourts.gov](mailto:onlinebailposting@akcourts.gov).  Please keep in mind that the court can only reply to the emails during processing hours listed [here](https://courts.alaska.gov/trialcourts/bail.htm).  The court replies to all emails as quickly as possible and appreciates your patience.
+  
+  If your contact information changes and you do not inform the court, you may not receive your money back when the case ends.  To update your contact information file [TF-955](https://public.courts.alaska.gov/web/forms/docs/tf-955.pdf).  
+---
+template: clerk_email
+subject: |
+  ${ users[0].name.full(middle="full") } - Online Secured Cash Bond Posting Agreement
+content: |
+  ${ users[0].name.full(middle="full") } is requesting a link to pay
+  % if person_filing == "obo":
+  ${ defendants[0].name.full(middle="full") }'s 
+  % else:
+  their
+  % endif
+  bail online.
+  
+  
+  Their  email address is: ${ users[0].email}
+---
+code: |
+  # recipient = get_config('cook after hours email')
+  user = users[0].email
+  recipient = 'mbento@akcourts.us'
+  clerk_email_sent_ok = al_court_bundle.send_email(to=recipient, reply_to=user, template=clerk_email)
+---
+id: email confirmation page
+continue button field: email_sent
+question: |
+  Form submitted to the clerk
+subquestion: |
+  **Your form was submitted to the court.**
+  
+  If you submitted it during processing hours, the court will contact you shortly with instructions and a link on how to pay bail online. If you sent it outside this time frame, you may need to wait for confirmation until processing hours.
+
+  **Important:** Read the reply email from the court for what to do next. 
+
+  To download your form or email it to yourself, click **Next**. It may take a minute to get to the next screen. You do not need to refresh.
+---
+id: email send error
+continue button field: email_not_sent
+question: |
+  Email error
+subquestion: |
+  **Your form was not sent to the court.**
+
+  Click **Back** to try again or download your form and email it to: [onlinebailposting@akcourts.gov](mailto:onlinebailposting@akcourts.gov)
+---
+# This must be in Docassemble YAML due to limits in how Docassemble
+# searches for events. It also somewhat safer to limit the scope of what
+# events can be triggered by JS
+# important 
+generic object: ALDocumentBundle
+event: x.send_email_action_event
+code: |
+  # important to match case in email addresses below!
+  if 'crobinsonatwork@gmail.com' in action_argument('email') or 'AKCourts.gov' in action_argument('email'):
+    email_success = x.send_email(
+        to=action_argument('email'),
+        editable=action_argument('editable'),
+        template=(
+          value(action_argument('template_name'))
+          if action_argument('template_name')
+          else None
+        ),
+        key=action_argument('key')
+    )
+  else:
+    email_success = x.send_email(
+        to=action_argument('email'),
+        # replace carogray email below with the court email address user should reply to.
+        reply_to = "carogray_1999@yahoo.com",
+        editable=action_argument('editable'),
+        template=(
+          value(action_argument('template_name'))
+          if action_argument('template_name')
+          else None
+        ),
+        key=action_argument('key')
+    )
+  if email_success:
+    # Exact phrase below is in Docassemble's words dictionary
+    log(word('E-mail was sent to') + ' ' + action_argument('email') ,'success')
+  else:
+    # E-mail failed is not in the default Docassemble words dictionary
+    log(word('E-mail failed'), 'error')
+---
