@@ -1,0 +1,367 @@
+---
+include:
+  - docassemble.AssemblyLine:assembly_line.yml
+  - emailing_onlinebailposting.yml
+  - docassemble.AKA2JBranding:custom_organization.yml
+  - docassemble.AKA2JBranding:recaptcha.yml
+---
+metadata:
+  title: >-
+    CR-234 Online Secured Cash Bond Posting Agreement
+  short title: >-
+    CR-234
+  description: |-
+    Online secured Cash Bond Posting Agreement 
+  can_I_use_this_form: |
+    If you are a defendant, or someone posting for a defendant, you can use this interview to post bail online.
+  before_you_start: |
+    Before you get started, you need to...pay your bill
+  maturity: production
+  estimated_completion_minutes: 60
+  estimated_completion_delta: 30
+  tags: [] 
+  authors:
+    - ACS
+  original_form: []
+  original_form_published_on: 2024-05-22
+  allowed_courts: []
+  typical_role: "defendant"
+  al_weaver_version: "1.10.3"
+  generated_on: "2024-05-23"
+  languages:
+    - en
+  jurisdiction: NAM-US-US+AK
+  review_date: 2024-05-23
+  form_titles:
+    - CR-234
+  form_numbers: []
+  update_notes: |
+  email config: ACS
+---
+code: |
+  AL_ORGANIZATION_TITLE = "Alaska Court System"
+---
+code: |
+  # This controls the default country and list of states in address field questions
+  AL_DEFAULT_COUNTRY = "US"
+---
+code: |
+  # This controls the default state in address field questions
+  AL_DEFAULT_STATE = "AK"
+---
+code: |
+  github_repo_name =  'docassemble-CR234OnlineSecuredCashBondPostingAgreement524'
+---
+code: |
+  interview_short_title = "Get a CR-234 online secured cash bond posting agreement 5-24"
+---
+objects:
+  - users: ALPeopleList.using(ask_number=True,target_number=1)
+  - defendants: ALPeopleList.using(ask_number=True,target_number=1)
+#---
+#sections:
+#  - review_CR234_online_secured_cash_bond_posting_agreement_524: Review your answers
+---
+#################### Interview order #####################
+mandatory: True
+comment: |
+  Controls order and branching logic for questions specific to this form
+id: Interview Order
+code: |
+  # Set the allowed courts for this interview
+  allowed_courts = []
+  # nav.set_section("review_CR234_online_secured_cash_bond_posting_agreement_524")
+  user_role = "defendant"
+  user_ask_role = "defendant"
+  cr234_intro
+  users[0].name.first
+  users[0].phone_number
+  if person_filing == "obo":
+    defendants[0].birthdate
+  user_role = person_filing
+  user_ask_role = person_filing
+  read_cr233
+  money_for_bonds
+  money_deposit
+  send_check
+  if person_filing == "obo":
+   forfeit_deposit_obo
+  else:
+   forfeit_deposit_def
+  if person_filing == "obo":
+   custody_obo
+  else:
+   custody_def
+  contact_info_change
+  # target_variable
+  preview_screen
+  # basic_questions_signature_flow
+  users[0].signature
+  signature_date
+  mailing_steps
+  CR234_online_secured_cash_bond_posting_agreement_524_download
+  interview_order_CR234_online_secured_cash_bond_posting_agreement_524 = True
+---
+id: CR234
+continue button field: cr234_intro
+question: |
+  ##CR-234 Online Secured Cash Bond Posting Agreement
+subquestion: |
+  ## Instructions:
+  1.  Answer the interview questions.  Your responses to the questions will be used to create the agreement form.
+  2. At the end of the interview, click “Submit form to the clerk” to send your form directly to the court for online bail processing.  You can also email yourself a copy of the form for your records.
+---
+id: User's Information
+question: |
+  My Information:
+fields:
+  - First Name: users[0].name.first
+  - Middle Name: users[0].name.middle
+    required: False
+  - Last Name: users[0].name.last
+  - Date of Birth: users[0].birthdate
+    datatype: date
+    max: ${ today() }
+---
+id: User's Information 2
+question: |
+  My Information:
+fields:
+  - Street Address: users[0].mailing_address.on_one_line
+    required: True
+  - City: users[0].city
+    required: True
+  - State: users[0].state
+    required: True
+  - Zip: users[0].zip
+    required: True
+  - Email: users[0].email
+    datatype: email
+    required: True
+  - Cell Phone: users[0].mobile_phone
+    required: false
+  - Work Phone: users[0].work_phone
+    required: false
+  - Home Phone: users[0].phone_number
+    required: false
+---
+id: user role
+question: |
+  Are you posting for yourself or somebody else?
+fields:
+  - "I am:": person_filing
+    label above field: True
+    datatype: radio
+    choices:
+      - "the defendant posting my own bond.": defendant
+      - "someone else posting bond for the defendant.": obo
+---
+id: Defendant's Information
+question: |
+  Defendant's Information:
+fields:
+  - First Name: defendants[0].name.first
+    required: True
+  - Middle Name: defendants[0].name.middle
+    required: False
+  - Last Name: defendants[0].name.last
+    required: True
+  - Date of Birth: defendants[0].birthdate
+    datatype: date
+    required: True
+---
+id: read CR-233
+question: |     
+fields:
+  - I read the Online Secured Cash Bond Posting Summary that the court emailed to me.: read_cr233
+    datatype: yesnowide
+validation code: |
+  if not read_cr233:
+    validation_error("You cannot continue until you have seleceted that you have read the Summary.")  
+---
+id: money
+question: |
+  ####Do you understand and agree to the following?
+  % if person_filing == "obo":
+  1.	I am depositing money as security for ${ defendants[0].name.first }'s bond.
+  % else:
+  1.	I am depositing money as security for my bond.
+  % endif
+  2. Each credit card transaction is assessed a 3% convenience fee.  This fee will **not** be returned to me, even if the amount of the bond is later returned (exonerated) to me.
+  3. The bond continues until the court cancels it.
+fields:
+  - I understand and agree.: money_for_bonds
+    datatype: yesnowide
+validation code: |
+  if not money_for_bonds:
+    validation_error("You cannot continue until you agree.")  
+---
+id: Money Deposit
+question: |
+  % if person_filing == "obo":
+  **If ${ defendants[0].name.first } follows** the conditions of the bond, the court will cancel the bond.
+  % else: 
+  **If I follow** the conditions of the bond, the court will cancel the bond.
+  % endif
+fields:
+  - If the court cancels the bond what do you want the court to do with your money?: money_deposit
+    label above field: True
+    datatype: radio
+    code: |
+      money_deposit_choices    
+---
+code: |
+  if person_filing == "obo":
+    money_deposit_choices = [
+      {'may': f"The court may use the money I deposit to pay { defendants[0].name.first }'s fine, judgment, or costs."},
+      {'may not': f"The court may **not** use the money I deposit to pay { defendants[0].name.first }'s fine, judgment, or costs."}
+                ]
+  else:
+    money_deposit_choices = [
+     {'may': "The court may use the money I deposit to pay my fine, judgment, or costs."},
+     {'may not': "The court may **not** use the money I deposit to pay my fine, judgment, or costs."}
+                ]
+---
+id: canceled or refunded bond
+question: |
+  ####The court will send me a check for the canceled bond money at the address I provided.
+  
+  The money will **not** be refunded on the original credit card used to post the bond.
+  
+  If I post the bond using another person’s credit card, the refund will go to me, not the holder of the credit card.  I am responsible for telling the credit card holder about this before I pay the bond.      
+fields:
+  - I understand and agree.: send_check
+    datatype: yesnowide
+validation code: |
+  if not send_check:
+    validation_error("You cannot continue until you agree.")
+---
+id: bond conditions defendant
+question: |
+  ####**If I do not follow** the conditions of the bond, the court will forfeit the money to the State of Alaska.  
+  ####The court will send me notice of forfeiture to the mailing or email address I provide.     
+fields:
+  - I understand and agree.: forfeit_deposit_def
+    datatype: yesnowide
+validation code: |
+  if not forfeit_deposit_def:
+    validation_error("You cannot continue until you agree.") 
+---
+mandatory: True
+id: bond conditions obo
+question: |
+  ####**If ${ defendants[0].name.first } does not follow** the conditions of the bond, the court will forfeit the money to the State of Alaska.
+  ####The court will send me notice of forfeiture to the mailing or email address I provide.      
+fields:
+  - I understand and agree.: forfeit_deposit_obo
+    datatype: yesnowide
+validation code: |
+  if not forfeit_deposit_obo:
+    validation_error("You cannot continue until you agree.")
+---
+id: custody defendant
+question: |
+  ####If I am in custody, the jail will not release me until the full bond amount has been posted for every case that has a bond requirement.  
+  ####The court will only notify the jail of bond payments made during [online bail processing hours](https://courts.alaska.gov/trialcourts/bail.htm).  It may take the jail a few hours after notification from the court to release me.
+fields:
+  - I understand and agree.: custody_def
+    datatype: yesnowide
+validation code: |
+  if not custody_def:
+    validation_error("You cannot continue until you agree.")     
+---
+id: custody defendant obo
+question: |
+  ####If ${ defendants[0].name.first } is in custody, the jail will not release ${ defendants[0].name.first } until the full bond amount has been posted for every case that has a bond requirement.
+  ####The court will only notify the jail of bond payments made during [online bail processing hours](https://courts.alaska.gov/trialcourts/bail.htm).  It may take the jail a few hours after notification from the court to release ${ defendants[0].name.first}.
+fields:
+  - I understand and agree.: custody_obo
+    datatype: yesnowide
+validation code: |
+  if not custody_obo:
+    validation_error("You cannot continue until you agree.")
+---
+id: Update Contact Info
+question: |
+  ####I will tell the court in writing if my email, phone number, or mailing address changes.
+fields:
+  - I understand and agree.: contact_info_change
+    datatype: yesnowide
+validation code: |
+  if not contact_info_change:
+    validation_error("You cannot continue until you agree.")
+---
+id: preview CR234_online_secured_cash_bond_posting_agreement_524
+question: |
+  Preview your form before you sign it
+subquestion: |
+  Here is a preview of the form you will sign on the next page.   
+  
+  ${ al_court_bundle.as_pdf(key='preview') }
+
+  Click the image to open it in a new tab.
+  
+  Remember to come back to this window to continue and sign your form.
+continue button field: preview_screen    
+---
+code: |
+  signature_fields = ['users[0].signature']
+---
+question: |
+  Sign below
+signature: users[0].signature
+---
+code: |
+  # This is a placeholder for the addresses that will be searched
+  # for matching address to court. Edit if court venue is based on 
+  # a different address than the user's
+  [user.address.address for user in users.complete_elements()]
+  addresses_to_search = [user.address for user in users.complete_elements()]
+---
+id: download CR234_online_secured_cash_bond_posting_agreement_524
+event: CR234_online_secured_cash_bond_posting_agreement_524_download
+question: |
+  All done
+subquestion: |
+  Thank you ${users}. Your form is ready to download and deliver.
+  
+  View, download and send your form below.
+  
+ 
+  ${ al_user_bundle.download_list_html() }
+  
+  ${ al_user_bundle.send_button_html(show_editable_checkbox=False) }
+  % if recaptcha_success:
+
+  To court (this is where the court email goes):
+
+  ${ "court email code" }
+
+  % endif
+
+progress: 100
+comment: |
+  al_user_bundel...download_html the buttons are View and Download
+  send_button give the box to email yourself and button that says send
+---
+# ALDocument objects specify the metadata for each template
+objects:
+  - CR234_online_secured_cash_bond_posting_agreement_524_attachment: ALDocument.using(title="CR-234", filename="CR234_online_secured_cash_bond_posting_agreement_524", enabled=True, has_addendum=False, )
+---
+# Bundles group the ALDocuments into separate downloads, such as for court and for the user
+objects:
+  - al_user_bundle: ALDocumentBundle.using(elements=[CR234_online_secured_cash_bond_posting_agreement_524_attachment], filename="CR234_online_secured_cash_bond_posting_agreement_524", title="All forms to download for your records", enabled=True)
+  - al_court_bundle: ALDocumentBundle.using(elements=[CR234_online_secured_cash_bond_posting_agreement_524_attachment],  filename="CR234_online_secured_cash_bond_posting_agreement_524", title="All forms to deliver to court", enabled=True)
+---
+# Each attachment defines a key in an ALDocument. We use `i` as the placeholder here so the same template is 
+# used for "preview" and "final" keys, and logic in the template checks the value of 
+# `i` to show or hide the user's signature
+---
+attachment:
+  name: CR234 online secured cash bond posting agreement 524
+  filename: CR234_online_secured_cash_bond_posting_agreement_524
+  variable name: CR234_online_secured_cash_bond_posting_agreement_524_attachment[i]
+  skip undefined: True
+  docx template file: CR234_Online_Secured_Cash_Bond_Posting_Agreement.docx
+  tagged pdf: True
+---
