@@ -44,7 +44,7 @@ def find_package_data(where='.', package='', exclude=standard_exclude, exclude_d
     return out
 
 setup(name='docassemble.CR234OnlineSecuredCashBondPostingAgreement',
-      version='24.9.5',
+      version='24.9.12',
       description=('CR-234'),
       long_description='# docassemble.Cr234AOnlineSecuredCashBondPostingAgreement524\r\n\r\nCR-234\r\n\r\n## Author\r\n\r\nACS\r\n\r\n',
       long_description_content_type='text/markdown',

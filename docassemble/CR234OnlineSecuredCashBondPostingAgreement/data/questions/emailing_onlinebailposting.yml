@@ -197,7 +197,7 @@ content: |
 code: |
   # recipient = get_config('cook after hours email')
   user = users[0].email
-  recipient = 'mbento@akcourts.us'
+  recipient = 'onlinebailposting@akcourts.gov'
   clerk_email_sent_ok = al_court_bundle.send_email(to=recipient, reply_to=users[0].email, template=clerk_email)
 ---
 id: email confirmation page

@@ -205,7 +205,7 @@ question: |
   **If I follow** the conditions of the bond, the court will cancel the bond.
   % endif
 fields:
-  - If the court cancels the bond what do you want the court to do with your money?: money_deposit
+  - If the court cancels the bond, what do you want the court to do with your money?: money_deposit
     label above field: True
     datatype: radio
     code: |
