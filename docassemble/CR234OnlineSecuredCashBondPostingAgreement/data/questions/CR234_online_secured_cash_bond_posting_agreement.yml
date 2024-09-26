@@ -174,7 +174,7 @@ fields:
 id: read CR-233
 question: |     
 fields:
-  - I read the Online Secured Cash Bond Posting Summary that the court emailed to me.: read_cr233
+  - I read the Notice of Request to Post Secured Cash Bail Online that the court emailed to me.: read_cr233
     datatype: yesnowide
 validation code: |
   if not read_cr233:
