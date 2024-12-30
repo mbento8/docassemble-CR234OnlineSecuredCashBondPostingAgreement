@@ -55,7 +55,11 @@ question: |
   Email contents
 subquestion: |
   email subject:
-  Online Secured Cash Bond Posting Agreement - Alaska Court System - ${ users[0].name.full(middle="full") } 
+  % if person_filing == "obo":
+  Online Secured Cash Bond Posting Agreement - Alaska Court System - ${ defendants[0].name.full(middle="full") }
+  % else:
+  Online Secured Cash Bond Posting Agreement - Alaska Court System - ${ users[0].name.full(middle="full") }
+  % endif
   
   [NEWLINE]
   Mail body: 
@@ -182,7 +186,13 @@ content: |
 ---
 template: clerk_email
 subject: |
-  ${ users[0].name.full(middle="full") } - Online Secured Cash Bond Posting Agreement
+  % if person_filing == "obo":
+  ${ defendants[0].name.full(middle="full") } 
+  - Online Secured Cash Bond Posting Agreement
+  % else:
+  ${ users[0].name.full(middle="full") }
+  - Online Secured Cash Bond Posting Agreement
+  % endif
 content: |
   ${ users[0].name.full(middle="full") } is requesting a link to pay
   % if person_filing == "obo":
@@ -245,7 +255,7 @@ code: |
     email_success = x.send_email(
         to=action_argument('email'),
         # replace carogray email below with the court email address user should reply to.
-        reply_to = "carogray_1999@yahoo.com",
+        reply_to = "onlinebailposting@akcourts.gov",
         editable=action_argument('editable'),
         template=(
           value(action_argument('template_name'))
